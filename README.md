@@ -57,7 +57,7 @@ This is a **Frontend Image Annotation Application** built with **Next.js** and *
 
 1.  **Clone the Repository**
 
-        git clone https://github.com/AhmedAyman-96/image-annotation-app.git
+        git clone https://github.com/AhmedAyman-96/image-annotation-ap.git
         cd image-annotation-app
 
 2.  **Install Dependencies**
