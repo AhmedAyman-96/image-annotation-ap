@@ -32,10 +32,11 @@ export default function Login() {
         body: JSON.stringify({ email, password }),
         credentials: "include",
       });
+      const data = await response.json();
 
       if (response.ok) {
         toast.success("Logged in successfully!");
-        router.push("/tasks");
+        window.location.href = data.redirectUrl;
       } else {
         const errorData = await response.json();
         toast.error(errorData.error || "Login failed");

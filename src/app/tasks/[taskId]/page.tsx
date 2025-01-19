@@ -68,7 +68,7 @@ export default function TaskDetails() {
 
         if (taskDoc.exists()) {
           const taskData = taskDoc.data() as Task;
-          setTask({ id: taskDoc.id, ...taskData });
+          setTask({ ...taskData, id: taskDoc.id });
           setAnnotations(taskData.annotations || []);
         } else {
           setError("Task not found.");

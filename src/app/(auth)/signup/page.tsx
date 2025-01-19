@@ -1,7 +1,10 @@
 "use client";
 import { useState } from "react";
 import { auth, firestore } from "@/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -37,7 +40,24 @@ export default function Signup() {
       });
 
       toast.success("Account created successfully!");
-      router.push("/tasks");
+      await signInWithEmailAndPassword(auth, email, password);
+      const response = await fetch("/api/user", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+        credentials: "include",
+      });
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Logged in successfully!");
+        window.location.href = data.redirectUrl;
+      } else {
+        const errorData = await response.json();
+        toast.error(errorData.error || "Login failed");
+      }
     } catch (error: any) {
       toast.error(error.message || "Signup failed. Please try again.");
     } finally {

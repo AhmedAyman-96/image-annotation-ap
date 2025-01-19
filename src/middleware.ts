@@ -10,6 +10,7 @@ export function middleware(request: NextRequest) {
   if (protectedRoutes.includes(path)) {
     const authToken = request.cookies.get("authToken")?.value;
     console.log("authToken", authToken);
+    console.log("All Cookies:", request.cookies.getAll());
 
     if (!authToken) {
       return NextResponse.redirect(new URL("/login", request.url));

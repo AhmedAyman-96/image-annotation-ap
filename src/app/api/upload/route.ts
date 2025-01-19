@@ -1,9 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
-import { getFirestore } from "firebase-admin/firestore";
+import { NextResponse } from "next/server";
+import { put } from "@vercel/blob";
+import { db } from "@/firebase-admin";
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File;
@@ -16,36 +15,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const allowedTypes = ["image/jpeg", "image/png", "image/gif"];
-    if (!allowedTypes.includes(file.type)) {
-      return NextResponse.json(
-        { error: "Only JPEG, PNG, and GIF images are allowed" },
-        { status: 400 }
-      );
-    }
+    // Upload the file to Vercel Blob
+    const blob = await put(`uploads/${userId}/${file.name}`, file, {
+      access: "public",
+    });
 
-    const maxSize = 5 * 1024 * 1024;
-    if (file.size > maxSize) {
-      return NextResponse.json(
-        { error: "File size must be less than 5MB" },
-        { status: 400 }
-      );
-    }
+    // Get the file URL
+    const fileURL = blob.url;
 
-    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
-    const buffer = Buffer.from(await file.arrayBuffer());
-
-    const uploadDir = path.join(process.cwd(), "public/uploads");
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-
-    const filePath = path.join(uploadDir, sanitizedFileName);
-    fs.writeFileSync(filePath, buffer);
-
-    const fileURL = `/uploads/${sanitizedFileName}`;
-
-    const db = getFirestore();
     const taskRef = db.collection("tasks").doc();
     await taskRef.set({
       id: taskRef.id,
@@ -56,7 +33,7 @@ export async function POST(request: NextRequest) {
       createdAt: new Date(),
     });
 
-    const userRef = db.collection("users").doc(userId);
+    const userRef = db.collection("users").doc(userId) as any;
     await userRef.update({
       tasks: [...(userRef.tasks || []), taskRef.id],
     });

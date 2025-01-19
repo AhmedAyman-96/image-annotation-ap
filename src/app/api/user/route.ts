@@ -49,12 +49,12 @@ export async function POST(request: NextRequest) {
           uid: userCredential.user.uid,
           email: userCredential.user.email,
         },
+        redirectUrl: "/tasks", // Add redirect URL to the response
       },
       { status: 200 }
     );
 
     setAuthCookies(response, idToken, refreshToken);
-
     return response;
   } catch (error) {
     console.error("Error logging in:", error);
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
     let decodedToken;
     try {
       decodedToken = await dbAuth.verifyIdToken(authToken);
-    } catch (error) {
+    } catch (error: any) {
       console.error("ID token verification failed:", error);
 
       if (error.code === "auth/id-token-expired") {
