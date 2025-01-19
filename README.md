@@ -39,7 +39,6 @@ This is a **Frontend Image Annotation Application** built with **Next.js** and *
 - **Tailwind CSS**: Utility-first CSS framework for styling.
 - **Firebase Authentication**: For user authentication.
 - **Firestore**: Real-time database for tasks and annotations.
-- **Firebase Storage**: For handling image uploads.
 
 ### Backend
 
@@ -74,6 +73,32 @@ This is a **Frontend Image Annotation Application** built with **Next.js** and *
         NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
         NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
         NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+
+FireStore Rules Example:
+
+                service cloud.firestore {
+                  match /databases/{database}/documents {
+                    // Allow users to create their own document in the "users" collection
+                    match /users/{userId} {
+                      // Allow creation of a user document if the document ID matches the authenticated user's UID
+                      allow create: if request.auth != null && request.auth.uid == userId;
+                      
+                      // Allow read and write access to the user's own document
+                      allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+                    }
+                
+                    // Rules for the "tasks" collection
+                    match /tasks/{task} {
+                      // Allow read and write access if the user is authenticated and the task is assigned to them
+                      allow read, write: if request.auth != null && request.auth.uid == resource.data.assignedTo;
+                    }
+                
+                    // Example rule for another collection
+                    match /otherCollection/{document} {
+                      allow read, write: if request.auth != null;
+                    }
+                  }
+                }
 
 4.  **Run the Application**
 
